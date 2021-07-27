@@ -1,6 +1,3 @@
 # MarineParasitePhD
-### PhD repository
 
-This is a place to store all the information of my PhD. 
-
-Will update this readme when I get a chance...
+This is a place for extra code that doesn't have a place within any of the chapters.
