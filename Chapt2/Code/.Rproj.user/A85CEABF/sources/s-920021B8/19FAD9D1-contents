@@ -1,0 +1,66 @@
+###########################################
+
+########### Full Animalia list ############
+
+###########################################
+
+library(taxize)
+library(worrms)
+library(tidyverse)
+
+# this chunk of code is to bring in the entire Worms Animalia dataset
+# to do this, we needed to figure some stuff out...
+#1) I brought in a list of Animalia phylum
+
+Animalia <- children('Animalia', db = 'worms')
+
+#2) Looking at worms I broke it down into each phylum with > 10 000 species
+source(c(Arthropoda, Cnidaria, Chordata, Mollusca, Nematoda, Platyhelminthes))
+# I ran these as concurrent jobs ...
+
+#The rest I ran through here
+source(Animalia.job)
+
+
+#3) Let's bring them all together
+Animalia.check <- children('Animalia', db = 'worms')[[1]]
+
+###can I bring this in from Git Hub ???
+#This calls all .csv files from the data file
+Animalia <- as_tibble(list.files('C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data',
+                           pattern = ".csv", full.names = TRUE)) %>%
+  filter(!str_detect(value, 'arthropoda_')) %>%
+  filter(!str_detect(value, 'chordata_'))
+
+colnames(Animalia)
+
+#now that we have the files, let's bring in the datasets into one holistic set
+Animalia <- bind_rows(apply(Animalia, 1, read_csv)) 
+
+see <- distinct(Animalia, valid_name, .keep_all = TRUE)
+
+see <- count(Animalia.final, phylum)
+Chaetognatha <- filter(Animalia.final, phylum %in% 'Tardigrada')
+see <- count(Animalia, isExtinct)
+see <- count(Animalia.final, isExtinct)
+see <- count(Animalia.final, status)
+
+# animalia 203 675
+Animalia.final <- Animalia %>%
+  #These are some "extra" phyla that snuck into the code
+  filter(!phylum %in% c("Ciliophora", "Myzozoa", 'Tracheophyta')) %>%
+  #there is a bit of repetition
+  distinct() %>%
+  #Keep only "accepted"
+  filter(status %in% "accepted") %>%  
+  #dplyr::distinct(valid_name, .keep_all = TRUE) %>%
+  #filter(valid_name == scientificname) %>%
+  #Remove animals that ONLY occur in Terrestrial and Freshwater
+  filter(!(is.na(isMarine) | isMarine == 0 & isTerrestrial %in% 1 | isFreshwater %in% 1)) %>%
+  
+  #Remove extinct species
+  filter((isExtinct %in% 0 | is.na(isExtinct)))
+  
+   
+
+write_csv(see, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/test.csv")
