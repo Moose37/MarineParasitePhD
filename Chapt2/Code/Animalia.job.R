@@ -32,7 +32,7 @@ worms_records <- function(x,y,z) {
     }))
   
   #save in file
-  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets/",x,".csv", sep=""))
+  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/",x,".csv", sep=""))
 
 }
 
@@ -47,7 +47,7 @@ just_worms_records <- function(x,y) {
   }))
   
   #save in file
-  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets/",x,".csv", sep=""))
+  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/",x,".csv", sep=""))
   
 }
 
@@ -65,6 +65,7 @@ just_worms_records <- function(x,y) {
 #Echinodermata<- worms_records("Echinodermata", 'phylum', 'phylum')
 #Entoprocta<- just_worms_records("Entoprocta", 'phylum')
 #Gastrotricha<- worms_records("Gastrotricha", 'phylum', 'phylum')
+#Gnathifera<- worms_records("Gnathifera", 'phylum', 'phylum')
 #Gnathostomulida<- worms_records("Gnathostomulida", 'phylum', 'phylum')
 #Hemichordata<- worms_records("Hemichordata", 'phylum', 'phylum')
 #Kinorhyncha<- just_worms_records("Kinorhyncha", 'phylum')

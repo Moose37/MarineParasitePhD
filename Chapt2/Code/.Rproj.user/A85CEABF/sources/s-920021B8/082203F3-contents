@@ -1,0 +1,508 @@
+## Populate discovery rates info with more information.
+##See if you can further classify parasitic species as Marine
+#To do this I need to:
+#1) Housekeeping. Install packages and set WD
+#2) I have identified all parasitic nodes in taxanimic tree, call downstream from those nodes
+#3) Use these species names to call directly out of WoRMS for full information
+#4) I then classify each node with general taxanomic identifyer e.g."Helminths", "Crustaceans" etc
+#5) draw this all together into full species list
+#...This will allow me to call out all marine species names and authority information.
+
+#load Packages
+library(taxize)
+library(worrms)
+library(tidyverse)
+
+
+#housekeeping, setting working directories
+#work
+#setwd("C:/Users/tmor201/Google Drive/Publications/Mark idea's")
+#home
+setwd("C:/Users/Mooseface/Google Drive/Publications/Mark idea's")
+
+##Calls out information (species name, information specific to database):
+#Example code
+#downstream ("TAXA", downto = "Species", db = "itis", "col", "gbif", "ncbi", ask=T/F, rank = "species")
+
+#Establish function that streamlines calls
+#worms_records (x = taxaname, y = rank of taxaname)
+#There is an issue here. it only works if the taxonomy between WoRMS and GBIF are the same. 
+
+#worms_records(clade_name, clade_level, GBIF_level)
+#e.g.: worms_records("Rhizocephala", "superorder", "order")
+worms_records <- function(x,y,z) {
+  #First we need to download both GBIF and WoRMS ID's for the species. 
+  #We can evaluate WoRMS taxonomy to match GBIF and then go from there
+  #This is an if else statement to either give me the matched taxon names, or find ones that work with GBIF
+  gbif <- if(z == y) {x}
+  else if(z != y) {name<-do.call(rbind, downstream(x, db = 'worms', downto = z, rank = y))
+                          name$name}
+  #Use evaluated taxa names
+  gbif <- do.call(rbind, downstream(gbif, db = 'gbif', downto = 'species', rank = y)) # pulls GBIF species out
+  wm_id <- get_wormsid(gbif$name, searchtype = "scientific", 
+                       marine_only = FALSE, accepted = TRUE, messages = FALSE, ask = FALSE) # Pulls wormsid per gbif species
+  wm_id <- as.numeric(wm_id)
+  worms <- do.call(rbind, downstream(x, db = 'worms', downto = 'species', rank = y)) #pulls worms species names out
+  
+  #Join GBIF and WoRMS together and remove any NA's from the joined dataset
+  
+  gbif <- cbind(gbif, wm_id) %>%
+    select(id = wm_id, name, rank, key)
+  join <- full_join(worms,gbif, by = c('id', 'name', 'rank')) %>%
+    filter(!is.na(id))
+  
+  #Finally call the full worms record out
+  do.call(rbind, lapply(join$id, function(i){
+    
+    wm_record(i)
+    
+  }))
+}
+
+#This is to call just GBIF and see if it's in WoRMS
+gbif2worms <- function(x,y,z) {
+  #First we need to download both GBIF and WoRMS ID's for the species. 
+  #We can evaluate WoRMS taxonomy to match GBIF and then go from there
+  #This is an if else statement to either give me the matched taxon names, or find ones that work with GBIF
+  gbif <- if(z == y) {x}
+  else if(z != y) {name<-do.call(rbind, downstream(x, db = 'worms', downto = z, rank = y))
+  name$name}
+  #Use evaluated taxa names
+  gbif <- do.call(rbind, downstream(gbif, db = 'gbif', downto = 'species', rank = y)) # pulls GBIF species out
+  wm_id <- get_wormsid(gbif$name, searchtype = "scientific", 
+                       marine_only = FALSE, accepted = TRUE, messages = FALSE, ask = FALSE) # Pulls wormsid per gbif species
+  wm_id <- as.numeric(wm_id)
+  
+  #Join GBIF and WoRMS together and remove any NA's from the joined dataset
+  
+  gbif <- cbind(gbif, wm_id) %>%
+    select(id = wm_id, name, rank, key) %>%
+    filter(!is.na(id))
+  
+  #Finally call the full worms record out
+  do.call(rbind, lapply(gbif$id, function(i){
+    
+    wm_record(i)
+    
+  }))
+}
+
+####
+###Crustaceans
+##Branchiura
+Branchiura <- worms_records("Argulidae", "family", "family")
+
+##Copepoda
+Cyclopoida <- worms_records(c("Archinodephyidae", "Ascidicolidae", "Mantridae", "Notodelphyidae"), "family", "family")
+Copepoda <- worms_records(c("Monstrilloida", "Siphonostomatoida"), 'order', 'order')
+Copepoda <- bind_cols("Cyclopoida", "Copepoda")
+#write.csv(Copepoda, "C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Copepoda.csv")
+
+##Ascothoracida
+Ascothoracida <- worms_records(c("Dendrogastrida", "Laurida"), 'order', 'order') #103949 - Laurida
+
+##Rhizocephala
+Rhizocephala <- worms_records("Rhizocephala", "superorder", "order")
+
+##Thoracica
+Thoracica <- worms_records(c('Rhizolepas', 'Anelasma'), 'genus', 'genus')
+
+##Isopoda
+Isopoda1 <- worms_records(c("Cymothooidea", "Cryptoniscoidea", "Bopyroidea"), 'superfamily', 'family')
+
+Isopoda2<-read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/Crustaceans/IsopodaElite.csv")
+Isopoda2 <- do.call(rbind, lapply(Isopoda2$AphiaID_WoRMS, function(i) {
+  wm_record(i)
+}))
+
+Isopoda<- rbind.data.frame(Isopoda1, Isopoda2) %>%
+  distinct()
+rm(Isopoda1, Isopoda2)
+
+
+##Amphipoda
+Amphipoda <- downstream(1205, downto = 'family', db = 'worms')[[1]]$name
+Amphipoda <- do.call(rbind, Amphipoda)
+Amphipoda <- worms_records(c(downstream(1205, downto = 'family', db = 'worms')[[1]]$name, "Cyamidae"), 'family', 'family')
+
+##Pentastomida
+Pentastomida <-read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/Crustaceans/WoRMS_taxlist_Pentastomida.csv") #direct download
+Pentastomidaworms <- wm_record(Pentastomida$AphiaID)
+Pentastomidagbif <- gbif2worms('Pentastomida', 'subclass', 'order')
+Pentastomida <- bind_rows(Pentastomidagbif, Pentastomidaworms) %>%
+  distinct()
+rm(Pentastomidagbif, Pentastomidaworms)
+
+##Tantulocardia
+Tantulocarida<- worms_records(c("Basipodellidae", "Cumoniscidae", "Doryphallophoridae", "Microdajidae"), 'family', 'family')
+
+
+#Draw all together to form parasite species list, from WoRMS, into one Crustacean dataset
+Crustaceans<- rbind(Branchiura,Copepoda,Ascothoracida,Rhizocephala,Thoracica,Isopoda,Amphipoda,Pentastomida,Tantulocarida)
+Crustaceans<- cbind(Crustaceans,clade="Crustaceans") %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+#Housekeeping
+#rm(Branchiura,Copepoda,Ascothoracida,Rhizocephala,Thoracica,Isopoda,Amphipoda,Pentastomida,Tantulocardia)
+
+###Mollusca
+#Bivalvia (Not sure these are practicle. only freshwater.)
+#Bivalvia <- worms_records("Unionida", 'order')
+
+#Gastropods
+
+Gastropoda <- worms_records(c("Eulimidae", "Pyramidellidae", "Ovulidae", "Epitoniidae", "Triviidae",
+                "Architectonicidae", "Cypraeidae", "Colubrariidae", "Cancellariidae", "Marginellidae"), 'order', 'order')
+
+#Eulimidae<- downstream ("Eulimidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Eulimidae<- rbind(Eulimidae$Eulimidae)
+#Worms_rec_Eulimidae<- worms_records(scientific = Eulimidae$name)
+#Pyramidellidae<-downstream ("Pyramidellidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Pyramidellidae<-rbind(Pyramidellidae$Pyramidellidae)
+#Worms_rec_Pyramidellidae<-worms_records(scientific = Pyramidellidae$name)
+#Ovulidae<-downstream ("Ovulidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Ovulidae<-rbind(Ovulidae$Ovulidae)
+#Worms_rec_Ovulidae<-worms_records(scientific = Ovulidae$name)
+#Epitoniidae<-downstream ("Epitoniidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Epitoniidae<-rbind(Epitoniidae$Epitoniidae)
+#Worms_rec_Epitoniidae<-worms_records(scientific = Epitoniidae$name)
+#Triviidae<-downstream ("Triviidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Triviidae<-rbind(Triviidae$Triviidae)
+#Worms_rec_Triviidae<-worms_records(scientific = Triviidae$name)
+#Architectonicidae<-downstream ("Architectonicidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Architectonicidae<-rbind(Architectonicidae$Architectonicidae)
+#Worms_rec_Architectonicidae<-worms_records(scientific = Architectonicidae$name)
+#Cypraeidae<- downstream ("Cypraeidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Cypraeidae<- rbind(Cypraeidae$Cypraeidae)
+#Worms_rec_Cypraeidae<- worms_records(scientific = Cypraeidae$name)
+#Colubrariidae<- downstream ("Colubrariidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Colubrariidae<- rbind(Colubrariidae$Colubrariidae)
+#Worms_rec_Colubrariidae<- worms_records(scientific = Colubrariidae$name)
+#Cancellariidae<- downstream ("Cancellariidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Cancellariidae<- rbind(Cancellariidae$Cancellariidae)
+#Worms_rec_Cancellariidae<- worms_records(scientific = Cancellariidae$name)
+#Marginellidae<- downstream ("Marginellidae", searchtype = "scientific", downto = "Species", db = "gbif")
+#Marginellidae<- rbind(Marginellidae$Marginellidae)
+#Worms_rec_Marginellidae<- worms_records(scientific = Marginellidae$name)
+
+#Bring Gastropods together into molluscs
+
+Mollusca <- rbind.data.frame(Gastropoda)
+
+Mollusca<- cbind(Mollusca, clade="Mollusca") %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+#Housekeeping
+#rm(Triviidae, Epitoniidae, Pyramidellidae, Architectonicidae, Ovulidae, Eulimidae, Cypraeidae)
+
+#rm(Worms_rec_Triviidae, Worms_rec_Epitoniidae, Worms_rec_Pyramidellidae, 
+#   Worms_rec_Architectonicidae, Worms_rec_Ovulidae, Worms_rec_Eulimidae,  Worms_rec_Cypraeidae)
+
+
+###Helminths
+
+##Acanthocephala
+Acanthocephala <- worms_records(c("Palaeacanthocephala", "Eoacanthocephala"), 'class', 'class') %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Annelids
+#Annelida<- c("Rhynchobdellida", "Arhynchobdellida")
+Annelida <- worms_records(c("Rhynchobdellida", "Arhynchobdellida"),'order', 'order') %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Platyhelminthes
+#These are all large, so I have set up individual downloads. But for these I call in previously downloaded data.
+Platyg<- worms_records('Platyhelminthes', 'phylum', 'phylum')
+
+#Rhabditophora <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/Rhabditiphora.csv")
+#Worms_rec_rhabdit <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/RhabditiphoraWorms.csv")
+
+Cestoda <- filter(Platyg, class %in% 'Cestoda')%>%
+  select(-taxonRankID, -parentNameUsageID)
+Trematoda <- filter(Platyg, class %in% 'Trematoda')%>%
+  select(-taxonRankID, -parentNameUsageID)
+Monogenea <- filter(Platyg, class %in% 'Monogenea')%>%
+  select(-taxonRankID, -parentNameUsageID)
+Fecampiida <- filter(Platyg, order %in% 'Fecampiida')%>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Nematoda
+
+#Nematoda <- c('Rhabditida', 'Ironina', 'Monhysterida', 'Trichinellida', 'Dioctophymatida') 
+#(Mark Blaxter and Georgios Koutsovoulos. The evolution of parasitism in Nematoda. Parasitology (2015), 142, S26-S39)
+
+#parasitic Nematode clades<- c('Rhabditida', 'Ironina', 'Monhysterida', 'Trichinellida', 'Dioctophymatida'))
+#c('2143', '458800', '2139', '834679', '22885')
+#Nematoda <- worms_children (ids = '799')
+
+#Like Cestoda, Complex. So this is WoRMS parasite list:
+#Nematodag<- worms_records('Nematoda', 'phylum')
+Nematoda <- worms_records(c('Rhabditida', 'Monhysterida', 'Enoplida', 'Dioctophymatida' ), 'order', 'order')
+#Nematoda <- filter(Nematodag, order %in% c('Rhabditida', 'Monhysterida', 'Enoplida', 'Dioctophymatida' ))
+Nematoda <- select(Nematoda, -taxonRankID, -parentNameUsageID)
+
+#Drawing all Helminth species together.
+
+Helminths<-rbind(Acanthocephala, Annelida, Cestoda, Monogenea, Trematoda, Nematoda, Fecampiida)
+Helminths<-cbind(Helminths,clade="Helminths")
+
+#Housekeeping
+#rm(Acanthocephala, Cestoda, Monogenea, Trematoda, Nematoda, Fecampiida)
+
+########## NB to call in all other smaller parasitic species i.e. chordates,polychetes(maybe), Annelids (check rohde book) etc.
+
+##Nematera
+#Horse hair worms
+#Nectonematoida<- downstream ("Nectonematoida", searchtype = "scientific", downto = "Species", db = "gbif")
+#Nectonematoida<- rbind(Nectonematoida$Nectonematoida)
+#Worms_rec_Nematomorpha<- worms_records(scientific = Nectonematoida[,1])
+#Worms_rec_Nematomorpha<- cbind(Worms_rec_Nematomorpha, clade="Nematomorpha") %>%
+#  select(-taxonRankID, -parentNameUsageID)
+
+##Acari
+##Acari
+#Acari<- Astigmata <- c('Turbinoptidae', 'Analgoidea', 'Pterolichoidea', 'Laminosiptidae', 'Hypoderatidae', 'Hyadesidae') 
+#        Prostigmata <- c(Syringophilidae, Halacaridae, Trombiculidae, Cloacaridae, Demodecidae.) 
+#        Mesostigmata <- c(Halarachnidae, Rhinonyssidae) 
+#        Ixodida <- c(Ixodidae, Argasidae)
+
+Parasitiformes <-read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/Crustaceans/WoRMS_taxlist_Parasitiformes.csv") #direct download
+
+Acari<- worms_records(c('Astigmata', 'Prostigmata', 'Mesostigmata', 'Ixodida'), 'suborder', 'family')
+
+Acari2<- do.call(rbind, lapply(c(Parasitiformes$AphiaID_accepted), function(i) {
+  wm_record(i)
+}))
+Acari3<- gbif2worms(c('Astigmata', 'Prostigmata', 'Mesostigmata', 'Ixodida'), 'order', 'order')
+Acari<- bind_rows(Acari, Acari2, Acari3) %>%
+  distinct()
+#Acari<- c("150317", "1414", "150319", "760684")
+Acari<- cbind(Acari, clade="Arachnida")%>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Pycnogonids
+
+
+##Polychetes
+
+
+##Tardigrades
+Tardigrade <- wm_record(as.numeric(get_wormsid(c('Tetrakentron synaptae','Pleocola limnoriae','Echiniscoides hoepneri'))))
+Tardigrade<- cbind(Tardigrade, clade="Tardigrade") %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Insecta
+#Phthiraptera [Psocodea] (Amblycera, Ischnocera, Anoplura)
+#Siphonaptera (Ceratophyllidae, Pulicidae, Pygiopsyllidae, Rhopalopsyllidae)
+Phthiraptera <-read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/Crustaceans/WoRMS_taxlist_Phithraptera.csv") #direct download
+Siphonaptera <-read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/Crustaceans/WoRMS_taxlist_Siphonaptera.csv") #direct download
+
+Insectaworms <- do.call(rbind, lapply(c(Phthiraptera$AphiaID_accepted, Siphonaptera$AphiaID_accepted), function(i) {
+  wm_record(i)
+}))
+
+Insectagbif <- gbif2worms(c("Psocodea", "Siphonaptera"), 'order', 'order')
+Insecta <- bind_rows(Insectaworms, Insectagbif) %>%
+  distinct()
+rm(Insectagbif, Insectaworms, Phthiraptera, Siphonaptera)
+
+Insecta<- cbind(Insecta, clade="Insecta") %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Chordata
+#Lampreys
+Petromyzontiformes<- worms_records("Petromyzontiformes", 'order', 'order')
+
+#Pearlfish
+Encheliophis<- worms_records("Encheliophis", 'genus', 'genus')
+
+#Snubnosed Eel
+Simenchelys<- worms_records("Simenchelys", 'genus', 'genus')
+
+#Bring the Chordates into one
+Chordata<- rbind(Petromyzontiformes, Encheliophis, Simenchelys)
+Chordata<- cbind(Chordata, clade="Chordata")  %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Orthonectida
+Orthonectida<- worms_records('Orthonectida', 'phylum', 'phylum')
+Orthonectida<- cbind(Orthonectida, clade="Orthonectida")  %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Dicyemida (Rhombozoa)
+Diceymida<- worms_records ("Dicyemida", 'phylum', 'phylum')
+Diceymida<- cbind(Diceymida, clade="Dicyemida")  %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+##Myxozoa
+Myxozoa<- worms_records("Myxozoa", 'phylum', 'phylum')
+Myxozoa<- cbind(Myxozoa, clade="Cnidaria")  %>%
+  select(-taxonRankID, -parentNameUsageID)
+
+#Minor species into one
+Minor <- rbind(Acari, Insecta, Chordata,
+                       Orthonectida, Diceymida, Myxozoa)
+
+###Draw all WoRMS Records into one holistic parasite set
+
+Worms_psite<-rbind(Crustaceans, Mollusca, Helminths, Minor) %>%
+  mutate_at(vars(valid_authority), funs(gsub("[[:punct:]]", '', valid_authority)))%>%
+  mutate(., Year = parse_number(valid_authority)) %>%
+  filter(!status %in% 'unaccepted') %>%
+  filter(!is.na(valid_name)) %>%
+  filter(isMarine == 1)
+
+write_csv(Worms_psite, "C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Worms_psite3.0.csv")
+
+see <- dplyr::count(Worms_psite, phylum, class)
+write_csv(see, "C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/see.csv")
+
+Worms_psite <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Worms_psite2.0.csv")
+###############################################
+#Now add the chondrichthyan list...
+Elasmo <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv") %>%
+  dplyr::select(Parasite) %>%
+  distinct()
+
+Elasmo <- get_wormsid(Elasmo$Parasite, accepted = TRUE)
+
+Elasmotest <- as_tibble(as.numeric(Elasmo)) %>%
+  filter(!is.na(value))
+
+#pull worm data for elasmo cestodes
+Elasmotest <- do.call (rbind, lapply(Elasmotest$value, function(i){
+  wm_record(i)
+}))
+count(Elasmotest, phylum, class)  
+#I need to clean it and add a clade fitting with Worms_psite
+Elasmosee <- dplyr::select(Elasmotest, -'taxonRankID', -'parentNameUsageID') %>%
+  #filter(!phylum %in% c('Cnidaria', 'Euglenozoa', 'Microsporidia', 'Myzozoa')) %>%
+  mutate(clade = fct_collapse(class,
+                              Arachnida = c('Arachnida'),
+                              Chordata = c('Actinopterygii', 'Petromyzonti'),
+                              Cinidaria = c('Myxozoa'),
+                              Crustaceans = c('Hexanauplia', 'Malacostraca', 'Ostracoda'),
+                              Helminths = c('Chromadorea', 'Clitellata', 'Enoplea', 'Eoacanthocephala', 'Cestoda', 'Nematomorpha',
+                                            'Monogenea', 'Palaeacanthocephala', 'Trematoda'),
+                              Mollusca = c('Gastropoda'),
+                              "NA" = c('Oligohymenophorea','Kinetoplastea','Microsporea','Conoidasida')
+  )) %>% #Catagorize according to clade
+  filter(!clade %in% "NA") %>%
+  mutate_at(vars(valid_authority), funs(gsub("[[:punct:]]", '', valid_authority)))%>%
+  mutate(., Year = parse_number(valid_authority))
+
+Final_set <- rbind(Elasmosee, Worms_psite) %>%
+  distinct(valid_AphiaID, valid_name, valid_authority, .keep_all = TRUE) %>%
+  filter(!is.na(valid_name)) %>%
+  filter(status %in% 'accepted') %>%
+  filter(!is.na(phylum)) %>%
+  filter(isExtinct != '1' | is.na(isExtinct))
+
+#There are still some repetitions...
+play<- count(Final_set, valid_name)%>% 
+arrange(desc(n))
+Final_set <- Final_set %>%
+  filter(!(valid_name %in% "Cephalobus persegnis" & valid_authority %in% "de Man")) %>%
+  filter(!(valid_name %in% "Coitocaecum indicum" & valid_AphiaID %in% "757004")) %>%
+  filter(!(valid_name %in% "Lecithochirium congeri" & valid_AphiaID %in% "1333703")) %>%
+  filter(!(valid_name %in% "Lecithocladium bengalense" & valid_AphiaID %in% "1390394")) %>%
+  filter(!(valid_name %in% "Sinuolinea schulmani" & valid_AphiaID %in% "120463"))
+
+Final_set <-  filter(Final_set,is.na(order) | order != "Gadiformes")
+Final_set <-  filter(Final_set,is.na(order) | order != "Perciformes")
+
+#Need to fix a few NA's
+Final_set$class [Final_set$phylum %in% 'Platyhelminthes' & is.na(Final_set$class)] <- "Fecampiida"
+Final_set$class [Final_set$phylum %in% 'Orthonectida' & is.na(Final_set$class)] <- "Orthonectida"
+
+
+write_csv(Final_set,"C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Worms_psite2.0.csv")
+
+#Clear working environment
+rm(list=ls())
+gc()
+
+############
+############
+############
+
+##del
+TerrPsite <- read_csv("C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/TerrPsiteUpdated.csv")
+
+TerrPsite<- sample_n(TerrPsite,20)
+
+TerrPsitecol <- filter(TerrPsite,data_source_title == 'Catalogue of Life')
+TerrPsitewrms <- filter(TerrPsite,data_source_title == 'World Register of Marine Species')
+TerrPsitegbif <- filter(TerrPsite,data_source_title == 'GBIF Backbone Taxonomy')
+
+TerrPsitecol <- upstream(get_colid(TerrPsitecol$by, ask=FALSE), db = 'col', upto = 'phylum')
+
+TerrPsitewrms <- classification(TerrPsitewrms, db = 'worms')
+TerrPsitegbif <- classification(TerrPsitegbif$by, db = 'gbif')
+name_backbone(TerrPsitegbif)
+  
+##DEL
+
+###Quick load of above workspace
+#load("C:/Users/tmor201/Google Drive/Publications/Mark idea's/Psite Data.RData")
+
+###OBIS
+#taxa <- checklist(scientificname = ,fields = c("species","records","tauthor")) #This takes way too long
+
+#Easier to call checklist of the above general orders and families
+
+##########
+##########
+##########
+##########
+##########
+
+
+####Marine Species.
+##See if you can download all marine species off WoRMS
+#first set up full GBIF download, then call into WoRMS
+#marine <- downstream("Animalia", searchtype = "scientific", downto = "Species", db = "gbif", rank = "kingdom")
+#marine <- do.call(rbind, marine)
+
+gnr_datasources()
+
+test <- sample_n(marine,10)
+
+marine <- read_csv("C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/AnimaliaCoL.csv")
+
+marineworms <- select(marine, childtaxa_name) %>% 
+  slice(.,1:20) %>%
+  gnr_resolve(., data_source_ids=c(9), canonical=FALSE)
+
+
+### Therefore, I run a "children" all through the taxonomy of "Animalia" to species.
+#write_csv(marineWorms,"C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/AnimaliaWorms.csv")
+#Animalia = '2'
+marineworms<-worms_children(2)
+marineworms<-do.call(rbind, marineworms)
+
+##marineworms$valid_AphiaID
+marinewormstry <- dplyr::bind_rows(sapply(marineworms$valid_AphiaID, taxizesoap::worms_children))
+marineworms<-worms_children(marineworms$valid_AphiaID)
+marineworms<-do.call(rbind, marineworms)
+#marineworms <- filter(marineworms, status == 'accepted')
+count(marineworms, rank) #check if species are here yet
+
+Animalia <- rbind(Animalia, filter(marineworms, rank == 'Species'))
+write_csv(Animalia, "C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/WormsSpeciesList3.0.csv")
+write_csv(marineworms, "C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/TempWormsSpeciesList3.0.csv")
+marineworms <- filter(marineworms, rank != 'Species')
+
+#count(MarineWorms, rank) #No of species
+
+# Convert into useable dataset.
+colnames(MarPara)
+colnames(marinedata)
+
+MarPara <- MarPara %>% filter(., is.na(isExtinct) | isExtinct != '1') %>%
+  mutate_at(vars(valid_authority), funs(gsub("[[:punct:]]", '', valid_authority))) %>%
+  mutate(Year = parse_number(valid_authority))
+
+write_csv(marinedata, "C:/Users/tmor201/Google Drive/Publications/Mark idea's/Mark data/NewData/Worms_psite.csv")
+  
+

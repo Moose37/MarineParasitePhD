@@ -3,24 +3,24 @@
     "path": "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Code/AnimaliaData.R",
     "project_path": "AnimaliaData.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "2988873026",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1627422300424.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "41,36",
-        "scrollLine": "32"
+        "cursorPosition": "146,0",
+        "scrollLine": "113"
     },
     "folds": "",
-    "lastKnownWriteTime": 1627467036,
+    "lastKnownWriteTime": 1627529789,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1627467098215,
+    "last_content_update": 1627529789392,
     "read_only": false,
     "read_only_alternatives": []
 }

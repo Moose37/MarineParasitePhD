@@ -13,7 +13,7 @@ just_worms_records <- function(x,y) {
   }))
   
   #save in file
-  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets/chordata_",x,".csv", sep=""))
+  write_csv(i, file = paste("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/chordata_",x,".csv", sep=""))
   
 }
 
@@ -43,11 +43,11 @@ just_worms_records <- function(x,y) {
 Actinopterygii <- just_worms_records(c('Actinopterygii'), 'Gigaclass')
 
 #Let's bring it together into one chordata
-Chordata <- as_tibble(list.files('C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets',
+Chordata <- as_tibble(list.files('C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data',
                        pattern = "chordata_", full.names = TRUE))
             
 Chordata <- bind_rows(apply(Chordata, 1, read_csv)) 
 
-write.csv(Chordata, 'C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets/Chordata.csv')
+write.csv(Chordata, 'C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/Chordata.csv')
 
 
