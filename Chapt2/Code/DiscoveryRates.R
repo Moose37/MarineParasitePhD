@@ -29,18 +29,19 @@ library(segmented)
 
 ###Housekeeping of datasets
 
-#pull in dataframes (TerrPsite = Terrestrial Parasites, MarPara = Marine Parasites, marinedata = Marine Species)
-#change column names to match,                > rename()
-#decrease column number to relevent variables > select()
+#pull in dataframes (MarPara = Marine Parasites, marinedata = All Marine Species)
+
+#decrease column number to relevant variables > select()
 #remove punctuation                           > mutate_at(vars(authority), funs(gsub("[[:punct:]]", '', authority)))
 #add year from authority                      > mutate(Year = parse_number(authority))
 
-#TerrPsite <- read_csv("C:/Users/mooseface/Google Drive/Publications/Mark idea's/Mark data/NewData/TerrPsiteUpdated.csv")
-#tmor201
-#mooseface
+
 #file.edit("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/DiscoveryRates.R")
 #MarPara <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/Worms_psite2.0.csv") %>%
-MarPara <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Worms_psite2.0.csv") %>%
+MarPara <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt2/Data/FullParasite.csv.gz") %>%
+  dplyr::select(.,c("valid_AphiaID","valid_name","valid_authority","status","phylum","class","order")) %>%
+  mutate_at("valid_authority", ~ gsub("[[:punct:]]", '', valid_authority)) %>%
+  mutate(Year = parse_number(valid_authority)) %>%
   dplyr::select(valid_AphiaID,valid_name,valid_authority,status,phylum,class,order,Year)
 
 #file.edit("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/Animaliadata.R")
