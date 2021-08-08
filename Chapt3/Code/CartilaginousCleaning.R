@@ -22,11 +22,11 @@ rm(list = ls())
 ################################################################
 ######################################################
 #Lets bring all these things together...
-LRP <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkLRP.csv")
+LRP <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkLRP.csv")
 
-SharkRefscrape <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkRefscrape.csv")
+SharkRefscrape <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkRefscrape.csv")
 
-Cest <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/webscrapeCestodeDB.csv")
+Cest <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeCestodeDB.csv")
 
 FinalSet <- union(LRP, SharkRefscrape, Cest) %>%
   union(., Cest)
@@ -79,26 +79,26 @@ Psitetest <- Psite %>%
 SharkWorms <- bind_cols(Hosttest, Psitetest)
 
 #There we go. This is the hosts according to worms of parasites called out from Uconn and SharkRefs
-write_csv(SharkWorms, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkWoRMS.csv")
+write_csv(SharkWorms, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkWoRMS.csv")
 rm(list = ls(all.names = TRUE))
 
 #################################################################
 #Lets see What this dataset is composed of and clean out any specific issues 
 
-SharkWoRMS <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkWoRMS.csv")%>%
+SharkWoRMS <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkWoRMS.csv")%>%
   select(.,"Host","YearH",'phylumH','classH','orderH',
          'familyH','genusH',"Parasite","YearP",'phylumP',
          'classP','orderP','familyP', 'genusP')
 
 #bring in all the datasets and see if there are differences
-SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv") %>%
+SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv") %>%
   select(.,"Host","YearH",phylumH = "phylumH",classH = "classH",orderH = "orderH",
          familyH = "familyH",genusH = "genusH","Parasite","YearP",phylumP = "phylumP",
          classP = "classP",orderP = "orderP",familyP = "familyP", genusP = "genusP")
 
-LRP <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkLRP.csv")
-SharkRefscrape <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkRefscrape.csv")
-Cest <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/webscrapeCestodeDB.csv")
+LRP <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkLRP.csv")
+SharkRefscrape <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkRefscrape.csv")
+Cest <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeCestodeDB.csv")
 FinalSet <- union(LRP, SharkRefscrape, Cest, SharkWoRMS)
 
 
@@ -179,11 +179,11 @@ Finaladjusted <- distinct(Finaladjusted)
 Finaladjusted <- Finaladjusted %>% distinct(Host, Parasite, .keep_all = TRUE) %>%
   select(-test)
 
-write_csv(Finaladjusted, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv")
+write_csv(Finaladjusted, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")
 
 ################################################################
 # Let's give this set some functional and other grouping variables ...
-FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv") %>%
+FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv") %>%
   filter(!phylumP %in% c('Ciliophora', 'Euglenozoa', 'Microsporidia', 'Myzozoa'))
 
 #Parasite discovery by taxon and functional groups dataset:
@@ -219,7 +219,7 @@ FinalSet <- FinalSet %>%
   ))
 
 
-write_csv(FinalSet, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv")
+write_csv(FinalSet, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")
 
 ###How about some host variables
 ################################################################
@@ -229,10 +229,10 @@ library(rfishbase)
 #################################################
 #This is something that needs to be done....
 ##################################################
-#sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/FullSharklist.csv")
+#sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/FullSharklist.csv")
 
 #this is the downloaded chondrichthyses dataset off worms...
-sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Animalia sets/chordata_Chondrichthyes.csv")
+sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Animalia sets/chordata_Chondrichthyes.csv")
 
 #Lets see what pops out.
 #FishBase works off a bunch of relational databases. 
@@ -257,7 +257,7 @@ sharkvars <- left_join(sharkvars, sharkdiet, by = ("Species"))
 #shark<- full_join(sharksp, sharkst, by = "Species")
 
 #...and for all species that aren't fish...
-FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv") %>%
+FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv") %>%
   dplyr::count(Host)
 
 nonshark<- validate_names(FinalSet$Host, server = 'sealifebase')
@@ -302,7 +302,7 @@ fullset <- filter(fullset, !(Species %in% dups$Species))%>%
   union(., dups)
 
 #Lets keep this info
-write_csv(fullset, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkVars.csv")
+write_csv(fullset, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkVars.csv")
 
 
 play <- filter(fullset, is.na(Length))

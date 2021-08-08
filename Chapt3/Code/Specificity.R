@@ -9,8 +9,6 @@
 #This is to start setting up how we will assign a quantitative Psite specificity value for parasites.
 
 ####Housekeeping
-#setwd('C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code')
-setwd('C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code')
 library(picante)
 library(vegan)
 library(tidyverse)
@@ -35,8 +33,9 @@ library(modelr)
 #library(ggtree)
 
 #Set plot theme
-#source("C:/Users/tmor201/Google Drive/Publications/Mark idea's/theme_new.R")
-source("C:/Users/Mooseface/Google Drive/Publications/Mark idea's/theme_new.R")
+source("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/theme_new.R")
+source("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/theme_new.R")
+
 theme_set(theme_new()) #Set over all look of graph (theme_classic(), ggthemes - Package with additional ggplot2 themes)
 
 
@@ -44,8 +43,8 @@ theme_set(theme_new()) #Set over all look of graph (theme_classic(), ggthemes - 
 #Full shark and other non shark hosts to parasite list
 #see 'Uconnwebscrape.R' for database build...
 
-#SharkRef <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv")%>%
-SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkFull3.0.csv")%>%
+SharkRef <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
+#SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
   mutate(diff = YearP - YearH) %>% 
   drop_na()
 
@@ -70,8 +69,8 @@ sharkh <- as.data.frame(unclass(sharkh))
 
 #Pull full shark list
 
-#sharkvars <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/SharkVars.csv") %>%
-sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkVars.csv") %>%
+#sharkvars <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkVars.csv") %>%
+sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkVars.csv") %>%
   mutate(depth_range = DepthRangeDeep - DepthRangeShallow) %>%
   mutate(depth_midpoint = depth_range/2 + DepthRangeShallow) %>%
   as.data.frame(unclass(sharkvars))
@@ -85,7 +84,7 @@ sharkvars <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_an
 sharkvars$DemersPelag <- as.factor(sharkvars$DemersPelag)
 #sharkvars$IUCN_Code <- as.factor(sharkvars$IUCN_Code)
 
-#sharksweb <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/FullSharklist.csv")
+#sharksweb <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/FullSharklist.csv")
 
 #################################
 #Let's have alook at the data
@@ -172,11 +171,11 @@ ggplot(data = RPfigure, aes(x = YearH, y = diff)) + theme_new() +
 ##Therefore, stick to just SharkPapers through this section
 
 #SharkPapers <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/webscrapeSharkRef.csv")
-SharkPapers <- read_csv("C:/Users//Mooseface/Google Drive/University/PhD NZ/Data_and_code/webscrapeSharkRef.csv")
+SharkPapers <- read_csv("C:/Users//Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv")
 
 #To determine a "well sampled" host, 2 conditions need to be met:
 #1: evidence for saturation in their parasite accumulation curves
-#2: as species with at least 5 different parasites
+#2: host species with at least 5 different parasites
 ##SAC's SE don't work with 2 site or less ... therefore we need to remove those before we can begin ...
 
 SharkSampPsite <- dplyr::select(SharkRef, Host, Parasite) %>% 

@@ -166,7 +166,7 @@ final_list <- bind_cols(psite_papers_list, host_papers_list) %>%
 rm(test) 
 
 #This is the final set for sampling effort analysis
-write_csv(final_list, "C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/webscrapeSharkRef.csv")
+write_csv(final_list, "C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv")
 
 rm(host_list, host_papers_data, host_papers_list, 
    parasite_list, psite_papers_data, psite_papers_list, species_data, url)
@@ -179,7 +179,7 @@ rm(host_list, host_papers_data, host_papers_list,
 library('taxize')
 library('worrms')
 
-SharkPapers <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/webscrapeSharkRef.csv") %>%
+SharkPapers <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv") %>%
   select(host, parasite) %>%
   distinct()
 # Or if youve used ALL of the above just use "host_parasite_list"
@@ -252,6 +252,6 @@ Finalset <- filter(Finalset, !is.na(Parasite))%>%
 
 
 
-write_csv(Finalset, "C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/SharkRefscrape.csv")
+write_csv(Finalset, "C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkRefscrape.csv")
 ####
 
