@@ -46,9 +46,9 @@ worms_records <- function(x,y,z) {
 #source(CartilaginousCleaning)
 
 #read it back in...
-Shark_data <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/SharkFull3.0.csv")
-Shark_data <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/SharkFull3.0.csv")
+Shark_data <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")
 
+Shark_data <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")
 
 ####
 #Lets turn these into functions...
@@ -56,12 +56,16 @@ Shark_data <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarinePa
 
 gbif_occ <- function(x,y) { #only place species list/vector, y=label the file.
   #Occ (GBIF) through spocc
-  OccGbif.spocc <- spocc::occ(host$Host, from = c('gbif'), has_coords = TRUE)
-  OccGbif.spocc <- occ2df(OccGbif.spocc$gbif)
+  OccGbif.spocc <- spocc::occ(host, from = c('gbif'), has_coords = TRUE)
+  OccGbif.spocc <- occ2df(OccGbif.spocc$gbif) %>%
+    dplyr::select(species = acceptedScientificName, decimalLatitude, decimalLongitude, 
+                  coordinateUncertaintyInMeters, basisOfRecord, depth)
   
   #Occ (GBIF) through rgbif
   OccGbif.rgbif <- occ_data(scientificName = host$Host)
-  OccGbif.rgbif <- flatten_df(OccGbif.rgbif)
+  OccGbif.rgbif <- flatten_df(OccGbif.rgbif) %>%
+    dplyr::select(species = acceptedScientificName, decimalLatitude, decimalLongitude, 
+                  coordinateUncertaintyInMeters, basisOfRecord, depth)
   
   #Bring these two datasets together and save
   # we have incompatible types to join so will need to change that before we join.
@@ -85,12 +89,12 @@ gbif_occ <- function(x,y) { #only place species list/vector, y=label the file.
   OccGbif$decimalLatitude <- as.numeric(OccGbif$decimalLatitude)
   
   
-  write_csv(OccGbif, file = paste("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/SDM/Occ_gbif_",y,".csv", sep=""))
+  write_csv(OccGbif, "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt4/Data/Occ_GBIF.csv")
   
 }
 
 #Now pull unique host values out
-host <- as.data.frame(distinct(Shark_data, Host))[[1]]
+host <- as.data.frame(distinct(Shark_data, Host))
 
 
 OccGbif.Host <- gbif_occ(host$Host, "host")
@@ -98,7 +102,7 @@ rm(OccGbif.Host)
 #OccGbif.Parasite <- gbif_occ(unique(Shark_data$Parasite), "parasite")
 
 #read back in
-#OccGbif <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/SDM/Occ_GBIF.csv")                   
+#OccGbif <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Occ_GBIF.csv")                   
 
 
 #Occurrence (OBIS) through rOBIS
