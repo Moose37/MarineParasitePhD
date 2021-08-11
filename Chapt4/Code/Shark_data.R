@@ -54,15 +54,15 @@ Shark_data <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarinePa
 #Lets turn these into functions...
 ####
 
-gbif_occ <- function(x,y) { #only place species list/vector, y=label the file.
+gbif_occ <- function(x) { #only place species list/vector, y=label the file.
   #Occ (GBIF) through spocc
-  OccGbif.spocc <- spocc::occ(host, from = c('gbif'), has_coords = TRUE)
+  OccGbif.spocc <- spocc::occ(x, from = c('gbif'), has_coords = TRUE)
   OccGbif.spocc <- occ2df(OccGbif.spocc$gbif) %>%
     dplyr::select(species = acceptedScientificName, decimalLatitude, decimalLongitude, 
                   coordinateUncertaintyInMeters, basisOfRecord, depth)
   
   #Occ (GBIF) through rgbif
-  OccGbif.rgbif <- occ_data(scientificName = host$Host)
+  OccGbif.rgbif <- occ_data(scientificName = x)
   OccGbif.rgbif <- flatten_df(OccGbif.rgbif) %>%
     dplyr::select(species = acceptedScientificName, decimalLatitude, decimalLongitude, 
                   coordinateUncertaintyInMeters, basisOfRecord, depth)
@@ -97,8 +97,9 @@ gbif_occ <- function(x,y) { #only place species list/vector, y=label the file.
 host <- as.data.frame(distinct(Shark_data, Host))
 
 
-OccGbif.Host <- gbif_occ(host$Host, "host")
-rm(OccGbif.Host)
+OccGbif.Host <- gbif_occ(host$Host)
+
+#rm(OccGbif.Host)
 #OccGbif.Parasite <- gbif_occ(unique(Shark_data$Parasite), "parasite")
 
 #read back in
@@ -108,7 +109,13 @@ rm(OccGbif.Host)
 #Occurrence (OBIS) through rOBIS
 #OccObis <- dplyr::bind_rows(sapply(Copepoda$valid_name, robis::occurrence)) #for larger datasets
 
-OccObis.Host <- dplyr::bind_rows(sapply(distinct(Shark_data, Host), robis::occurrence)) %>% #for larger datasets
+HostOne <- slice(host, (1:99))
+HostTwo <- slice(host, (500:999))
+HostThree <- slice(host, (1000:max(row_number(host))))
+
+gc()
+
+OccObis.Host <- dplyr::bind_rows(sapply(HostOne$Host, robis::occurrence)) %>% #for larger datasets
                 dplyr::select(species = scientificName, decimalLatitude, decimalLongitude, 
                               coordinatePrecision, basisOfRecord, depth)
   

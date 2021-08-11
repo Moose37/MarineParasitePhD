@@ -101,27 +101,27 @@ SharkRefscrape <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Ma
 Cest <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeCestodeDB.csv")
 FinalSet <- union(LRP, SharkRefscrape, Cest, SharkWoRMS)
 
+
 #Bring together old and new
 Finaladjusted <- union(SharkRef, FinalSet)
-
-#Or bring in already cleaned set ... for extra cleaning
-#Finaladjusted <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")
 
 #Remove ROws with NA Hosts/Species
 Finaladjusted <-   filter(Finaladjusted, !is.na(Host))
 Finaladjusted <-   filter(Finaladjusted, !is.na(Parasite))
 
+
+
 #FINALLY, there are both parasites and hosts with variable genus names which creates repetition in set ... 
 #Lets see what they are ... and fix it below
 see <- dplyr::select(Finaladjusted, Host, genusH, Parasite, genusP) %>%
-  dplyr::count(., Host, genusH) %>%
+  dplyr::count(., Host, Parasite) %>%
   arrange(desc(n))
 
 #am I able to remove duplicate records. i.e: we only want each interaction once
 Finaladjusted <- unique(Finaladjusted)
 
 ###So, I'll just pull out the genus value in the species name, and make that the new genus column ... and remove repetitions
-Finaladjusted$genusH <- str_extract(Finaladjusted$Host, '[[:alpha:]]+') 
+Finaladjusted$genusH <- str_extract(Finaladjusted$Host, '[[:alpha:]]+')
 Finaladjusted$genusP <- str_extract(Finaladjusted$Parasite, '[[:alpha:]]+')
 
 
@@ -155,8 +155,6 @@ Finaladjusted$familyP [Finaladjusted$genusP %in% "Scalithrium"] <- "Rhinebothrii
 Finaladjusted$familyH [Finaladjusted$genusH %in% "Hyperoglyphe"] <- "Centrolophidae" 
 Finaladjusted$familyH [Finaladjusted$genusH %in% "Lutjanus"] <- "Lutjanidae"
 Finaladjusted$familyH [Finaladjusted$genusH %in% "Squalus"] <- "Squalidae"
-Finaladjusted$orderH [Finaladjusted$familyH %in% "Rhinobatidae"] <- "Rajiformes"
-Finaladjusted$orderH [Finaladjusted$familyH %in% "Pristidae"] <- "Pristiformes"
 
 #There are parasites in the Host column ... 
 Finaladjusted <- filter(Finaladjusted, !phylumH %in% "Platyhelminthes") %>%
