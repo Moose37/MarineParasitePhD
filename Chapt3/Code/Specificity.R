@@ -43,8 +43,8 @@ theme_set(theme_new()) #Set over all look of graph (theme_classic(), ggthemes - 
 #Full shark and other non shark hosts to parasite list
 #see 'Uconnwebscrape.R' for database build...
 
-#SharkRef <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
-SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
+SharkRef <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
+#SharkRef <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/SharkFull3.0.csv")%>%
   mutate(diff = YearP - YearH) %>% 
   drop_na()
 
@@ -172,8 +172,8 @@ ggplot(data = RPfigure, aes(x = YearH, y = diff)) + theme_new() +
 #There are 99 species difference between them.
 ##Therefore, stick to just SharkPapers through this section
 
-#SharkPapers <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/Data_and_code/webscrapeSharkRef.csv")
-SharkPapers <- read_csv("C:/Users//Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv")
+SharkPapers <- read_csv("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv")
+#SharkPapers <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/webscrapeSharkRef.csv")
 
 #To determine a "well sampled" host, 2 conditions need to be met:
 #1: evidence for saturation in their parasite accumulation curves
@@ -301,7 +301,7 @@ treefunc.host <- function (x) { # x <- SharkRef
   #need to tell formula "as.phylo.formula" how these are all related
   taxrel <- ~phylumH/classH/orderH/familyH/genusH/species 
   #this allows for a reworked formula for a cleaner output following taxonomic breaks
-  source("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/as.phylo.formula2.R") 
+  source("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/as.phylo.formula2.R") 
   tree <- as.phylo.formula(taxrel, data = Sharktax, collapse = FALSE)
   
   nodelabel.phylo(tree, column_to_rownames(Sharktax, 'species'), strict=TRUE)
@@ -318,7 +318,7 @@ treefunc.psite <- function (x) {
   #need to tell formula "as.phylo.formula" how these are all related
   taxrel <- ~phylumP/classP/orderP/familyP/genusP/species 
   #this allows for a reworked formula for a cleaner output following taxonomic breaks
-  source("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/as.phylo.formula2.R") 
+  source("C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/as.phylo.formula2.R") 
   tree <- as.phylo.formula(taxrel, data = Sharktax, collapse = FALSE)
   
   nodelabel.phylo(tree, column_to_rownames(Sharktax, 'species'), strict=TRUE)
@@ -565,7 +565,7 @@ moda_pri <-  mutate(moda_pri, ll_Lambda = ELambda - 2*moda_pri$sd.Lambda) %>%
 
 moda_pri$Sites <- as.character(moda_pri$Sites)
 
-#see <- anti_join(moda_pri, moda, by = "Species") #looks good to me ... its identicle
+#see <- anti_join(moda_pri, moda, by = "Species") #looks good to me ... its identical
 
 moda <-  bind_cols(moda_pri, Z = moda$Z, Z_pr = moda$Z_pr)
 
@@ -691,8 +691,8 @@ ggplot(Shark,aes(x = diff)) + theme_new() +
 #3) Phylogenetic diversity according to Picante
 # Before we start, lets reset community and tree for this analysis
 
-commat <- commatpsite(SharkRef)
-tree <- treefunc.psite (SharkRef)
+commat <- commathost(SharkRef)
+tree <- treefunc.host (SharkRef)
 #taxdist <- taxdistance.vegan (SharkRefcor)
 taxdist <- taxdistance.ape(tree)
 rownames(taxdist) <- colnames(taxdist) 
@@ -741,8 +741,10 @@ NRI <- rownames_to_column(NRI, "Species") %>%
 #i.e., species within the community are more closely related than expected by chance.
 
 #Now ... we need to bring all this information together so we can plot and play with it!
-FinalSet <- right_join(FinalSet, stphylodiv, by = "Species") %>%
-  right_join(., NRI, by = "Species")
+#FinalSet <- right_join(FinalSet, stphylodiv, by = "Species") %>%
+#  right_join(., NRI, by = "Species")
+
+FinalSet <- right_join(stphylodiv, NRI, by = "Species")
 
 #A few strange things followed through
 #FinalSet$habitat [FinalSet$habitat %in% "Secernentea"] <- "endo"
@@ -753,7 +755,7 @@ FinalSet <- right_join(FinalSet, stphylodiv, by = "Species") %>%
 FinalSet <- mutate(FinalSet, NRI = ses.mpd * -1)
 
 #Remember to specify hosts as habitats and parasites as habitats
-write_csv(FinalSet, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Phylospecificity_Host.csv")
+write_csv(FinalSet, "C:/Users/tmor201/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Phylospecificity_ParasiteHR.csv")
 
 summary(FinalSet)
 
@@ -770,7 +772,7 @@ summary(FinalSet)
 
 #1)
 #FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Chapt3Finalset999.csv", col_types = "cnnnnnnffffffffnnnnnnn")
-FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/Chapt3Finalset999host.csv", col_types = "cnnnnnnnnnnnn")
+FinalSet <- read_csv("C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Phylospecificity_HostPSR.csv", col_types = "cnnnnnnnnnnnn")
 
 #lets bring in corrected dataset and include sampling effort per host
 FinalSet <- left_join(FinalSet, sampef, by = c("Species" = "host")) #joins sampling effort

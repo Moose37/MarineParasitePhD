@@ -103,21 +103,23 @@ OccGbif.Host <- gbif_occ(host$Host)
 #OccGbif.Parasite <- gbif_occ(unique(Shark_data$Parasite), "parasite")
 
 #read back in
-#OccGbif <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Occ_GBIF.csv")                   
+#OccGbif <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Data/Occ_GBIF_Parasite.csv")                   
 
 
 #Occurrence (OBIS) through rOBIS
 #OccObis <- dplyr::bind_rows(sapply(Copepoda$valid_name, robis::occurrence)) #for larger datasets
 
-HostOne <- slice(host, (1:99))
-HostTwo <- slice(host, (500:999))
-HostThree <- slice(host, (1000:max(row_number(host))))
+
 
 gc()
 
 OccObis.Host <- dplyr::bind_rows(sapply(HostOne$Host, robis::occurrence)) %>% #for larger datasets
                 dplyr::select(species = scientificName, decimalLatitude, decimalLongitude, 
                               coordinatePrecision, basisOfRecord, depth)
+
+#This doesn't work for large sets... Lets try map it through a list
+OccObis.Host <- purrr::map(host$Host, robis::occurrence)
+
   
 write_csv(OccObis.Host, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SDM/Occ_OBIS_host.csv")
 

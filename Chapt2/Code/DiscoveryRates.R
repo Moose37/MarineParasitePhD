@@ -1,12 +1,4 @@
 ### Plot Discovery rates by year
-#Article
-setwd("C:/Users/mooseface/Google Drive/Publications/Mark idea's")
-#Chapter 2
-setwd("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code")
-
-#source("DiscoveryRates.R")
-
-#Need to pull all details together First
 
 library(tidyverse)
 library(ggpubr)
