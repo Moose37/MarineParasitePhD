@@ -1,26 +1,26 @@
 {
-    "id": "38FAFC65",
-    "path": "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt3/Code/Specificity.R",
+    "id": "EFBC4D47",
+    "path": "C:/Users/Mooseface/Google Drive/University/PhD NZ/MarineParasitePhD/Chapt4/Code/Shark_data.R",
     "project_path": null,
     "type": "r_source",
-    "hash": "1604578025",
+    "hash": "2041104272",
     "contents": "",
     "dirty": false,
-    "created": 1628548376929.0,
+    "created": 1629060990970.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "1147,0",
-        "scrollLine": "1120"
+        "cursorPosition": "123,0",
+        "scrollLine": "109"
     },
     "folds": "",
-    "lastKnownWriteTime": 1628737600,
+    "lastKnownWriteTime": 1629106235,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1628737600,
+    "last_content_update": 1629106235760,
     "read_only": false,
     "read_only_alternatives": []
 }

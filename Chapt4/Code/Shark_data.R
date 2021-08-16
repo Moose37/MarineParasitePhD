@@ -109,17 +109,23 @@ OccGbif.Host <- gbif_occ(host$Host)
 #Occurrence (OBIS) through rOBIS
 #OccObis <- dplyr::bind_rows(sapply(Copepoda$valid_name, robis::occurrence)) #for larger datasets
 
-
-
-gc()
-
-OccObis.Host <- dplyr::bind_rows(sapply(HostOne$Host, robis::occurrence)) %>% #for larger datasets
-                dplyr::select(species = scientificName, decimalLatitude, decimalLongitude, 
-                              coordinatePrecision, basisOfRecord, depth)
+#devlop function that can be "mapped"
+obis.occ <- function(x) {
+  
+  robis::occurrence(scientificname = x, fields = c('scientificName', 'decimalLatitude', 'decimalLongitude', 
+                                                   'coordinateUncertaintyInMeters', 
+                                                   'basisOfRecord', 'depth'))
+  
+}
 
 #This doesn't work for large sets... Lets try map it through a list
-OccObis.Host <- purrr::map(host$Host, robis::occurrence)
+OccObis.Host <- as.tibble(host[c(1:300),]) %>% mutate(occurence = purrr::map(host$Host, obis.occ))
 
+OccObis.Host <- unnest(OccObis.Host, c(Host, occurence), keep_empty = TRUE)
+
+#converts to numeric for mapping
+OccObis.Host$decimalLongitude <- as.numeric(OccObis.Host$decimalLongitude)
+OccObis.Host$decimalLatitude <- as.numeric(OccObis.Host$decimalLatitude)
   
 write_csv(OccObis.Host, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SDM/Occ_OBIS_host.csv")
 
@@ -129,14 +135,7 @@ OccObis.Parasite <- dplyr::bind_rows(sapply(unique(Shark_data$Parasite), robis::
 write_csv(OccObis.Parasite, "C:/Users/Mooseface/Google Drive/University/PhD NZ/Data_and_code/SDM/Occ_OBIS_parasite.csv")
 
 
-OccObis <- read_csv("C:/Users/mooseface/Google Drive/University/PhD NZ/Data_and_code/SDM/Copepoda_Occ_OBIS.csv")
-OccObis <- dplyr::select(OccObis, species = scientificName, decimalLatitude, decimalLongitude, 
-                         coordinatePrecision = coordinateUncertaintyInMeters, basisOfRecord, individualCount, depth)
 
-
-#converts to numeric for mapping
-OccObis$decimalLongitude <- as.numeric(OccObis$decimalLongitude)
-OccObis$decimalLatitude <- as.numeric(OccObis$decimalLatitude)
 
 #Removes any NA Occurence values
 OccObis <- filter(OccObis, !is.na(decimalLongitude)) %>%
